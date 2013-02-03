@@ -1,0 +1,93 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler">
+
+    <div style="text-align:right;">
+        <a href="${rootURL}/${currentView.owner.url}newView">Add view...</a>
+    </div>
+    <div style="text-align:center; margin-left:10%; margin-right:10%; line-height:200%;">
+    <script type="text/javascript">
+var TagCloud = function(){
+
+    var DEFAULT_UNIT = '%';
+    var DEFAULT_TEXT_PROPERTY = 'text';
+    var DEFAULT_VALUE_PROPERTY = 'value';
+
+    var gatherStatistics = function(data, config){
+
+        var currentMax = data[0][config.valueProperty];
+        var currentMin = data[0][config.valueProperty];
+
+        for(var i = 0; i &lt; data.length; i++){
+            var value = data[i][config.valueProperty];
+
+            currentMax = (currentMax &lt; value)?value:currentMax;
+            currentMin = (currentMin > value)?value:currentMin
+        }
+
+        return {
+            max  : currentMax,
+            min  : currentMin,
+            mid  : (currentMax+currentMin)/2,
+            unit : (currentMax-currentMin)/100
+        };
+    }
+
+    var defaultScaler = function(value, rangeData){
+        return ((value/rangeData.max)*100)+100;
+    }
+
+    return {
+        process : function(data, config){
+            config = config || {};
+
+            config.unit = config.unit || DEFAULT_UNIT;
+            config.textProperty = config.textProperty || DEFAULT_TEXT_PROPERTY;
+            config.valueProperty = config.valueProperty || DEFAULT_VALUE_PROPERTY;
+
+            var dataRange = gatherStatistics(data, config);
+            var scaler = config.scaler || defaultScaler;
+
+            for(var i = 0; i &lt; data.length; i++){
+                var scale = scaler(data[i][config.valueProperty], dataRange);
+                config.renderer(data[i][config.textProperty], scale, config.unit, data[i].url);
+            }
+        }
+    }
+}();
+
+var cloudData = [
+        <j:forEach var="view" items="${app.views}">
+            <j:if test="${view!=it}">
+                {text:"${view.viewName}", value:${view.items.size()}, url:"${app.rootUrl}${view.url}"},
+            </j:if>
+        </j:forEach>
+];
+
+TagCloud.process(cloudData,{
+    renderer : function(text, size, unit, url){
+        document.write("&lt;a href=\"" + url + "\" style=\"font-size:" + size + unit + "; white-space:nowrap;\">" + text + "&lt;/a> <st:nbsp/>");
+        }
+    ,scaler : function(value, rangeData){
+
+        var MAXFONTSIZE = 40;
+        var MINFONTSIZE = 12;
+
+        var spread = rangeData.max - rangeData.min;
+
+        if(spread == 0){
+            spread = 1;
+        }
+
+        return MINFONTSIZE + (value - rangeData.min) *
+               (MAXFONTSIZE - MINFONTSIZE) / spread;
+
+    }
+    ,unit : 'px'
+});
+</script>
+</div>
+    <div style="text-align:center; margin-top: 2em">
+        ${app.itemMap.size()} jobs (${it.enabledJobCount} enabled, ${it.buildingJobCount} building, ${it.queuedJobCount} queued) - ${app.nodes.size()} slaves (${it.onlineNodeCount} online)
+    </div>
+
+
+</j:jelly>
