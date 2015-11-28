@@ -1,7 +1,7 @@
 package jenkins.plugins.avv;
 
+import com.google.common.base.Predicate;
 import hudson.Extension;
-import hudson.model.AllView;
 import hudson.model.Descriptor;
 import hudson.model.Hudson;
 import hudson.model.Item;
@@ -12,15 +12,14 @@ import hudson.model.TopLevelItem;
 import hudson.model.View;
 import hudson.model.ViewDescriptor;
 import hudson.model.ViewGroup;
+import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 
 public class AllViewsView extends View {
 
@@ -36,7 +35,7 @@ public class AllViewsView extends View {
 
 	@Override
 	public Collection<TopLevelItem> getItems() {
-		return Hudson.getInstance().getItems();
+		return Jenkins.getInstance().getItems();
 	}
 
 	@Override
@@ -58,13 +57,29 @@ public class AllViewsView extends View {
 	}
 	
 	public int getEnabledJobCount() {
+		return getJobCount(Jenkins.getInstance(), new Predicate<Job>() {
+
+					@Override
+					public boolean apply(Job input) {
+						return input.isBuildable();
+					}
+				}
+		);
+	}
+
+	private int getJobCount(ItemGroup<? extends Item> group, Predicate<Job> predicate) {
 		int result = 0;
-		for (TopLevelItem item: getItems()) {
-			if (((Job) item).isBuildable()) result++;
+		for (Item item: group.getItems()) {
+			if (item instanceof ItemGroup) {
+				result += getJobCount((ItemGroup) item, predicate);
+			} else if (item instanceof Job) {
+				if (predicate.apply((Job) item)) result++;
+			}
+
 		}
 		return result;
 	}
-	
+
 	public int getOnlineNodeCount() {
 		int result = 0;
 		for (Node node: Hudson.getInstance().getNodes()) {
@@ -74,11 +89,14 @@ public class AllViewsView extends View {
 	}
 	
 	public int getBuildingJobCount() {
-		int result = 0;
-		for (TopLevelItem item: getItems()) {
-			if (((Job) item).isBuilding()) result++;
-		}
-		return result;
+		return getJobCount(Jenkins.getInstance(), new Predicate<Job>() {
+
+					@Override
+					public boolean apply(Job input) {
+						return input.isBuilding();
+					}
+				}
+		);
 	}
 
 	public int getQueuedJobCount() {
