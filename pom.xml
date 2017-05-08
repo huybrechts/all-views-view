@@ -25,6 +25,16 @@
     <developerConnection>scm:git:git@github.com:huybrechts/all-views-view.git</developerConnection>
   </scm>  
 
+    <build>
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-ssh</artifactId>
+				<version>2.4</version>
+			</extension>
+		</extensions>
+	</build>
+
   <distributionManagement>
     <repository>
       <id>hap-repository</id>
