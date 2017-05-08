@@ -10,7 +10,7 @@
   <packaging>hpi</packaging>
   <name>All Views View Plugin</name>
   <version>1.0-SNAPSHOT</version>
-  <url>http://wiki.jenkins-ci.org/display/JENKINS/All+Views+View+Plugin</url>
+  <url>http://wikihealthcare.agfa.net/display/JEN/All+Views+View</url>
 
   <licenses>
     <license>
@@ -20,4 +20,18 @@
     </license>
   </licenses>
 
+  <scm>
+    <connection>scm:git:git://github.com/jenkinsci/all-views-view.git</connection>
+    <developerConnection>scm:git:git@github.com:huybrechts/all-views-view.git</developerConnection>
+  </scm>  
+
+  <distributionManagement>
+    <repository>
+      <id>hap-repository</id>
+      <name>HAP Maven Repository</name>
+      <url>scp://maven-repository.agfahealthcare.com/maven-repository</url>
+      <uniqueVersion>true</uniqueVersion>
+    </repository>
+  </distributionManagement>
+  
 </project>
