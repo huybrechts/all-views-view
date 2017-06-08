@@ -55,10 +55,8 @@ var TagCloud = function(){
 }();
 
 var cloudData = [
-        <j:forEach var="view" items="${app.views}">
-            <j:if test="${view!=it}">
-                {text:"${view.viewName}", value:${view.items.size()}, url:"${app.rootUrl}${view.url}"},
-            </j:if>
+        <j:forEach var="view" items="${it.allViews}">
+            {text:"${view.viewName}", value: 1, url:"${app.rootUrl}${view.url}"},
         </j:forEach>
 ];
 

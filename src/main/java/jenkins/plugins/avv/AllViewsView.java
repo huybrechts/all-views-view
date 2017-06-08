@@ -1,5 +1,6 @@
 package jenkins.plugins.avv;
 
+import com.cloudbees.hudson.plugins.folder.Folder;
 import com.google.common.base.Predicate;
 import hudson.Extension;
 import hudson.model.Descriptor;
@@ -19,7 +20,9 @@ import org.kohsuke.stapler.StaplerResponse;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class AllViewsView extends View {
 
@@ -76,6 +79,17 @@ public class AllViewsView extends View {
 				if (predicate.apply((Job) item)) result++;
 			}
 
+		}
+		return result;
+	}
+
+	public List getAllViews() {
+		List result = new ArrayList();
+		result.addAll(Jenkins.getInstance().getViews());
+		result.remove(this);
+		try {
+			result.addAll(Jenkins.getInstance().getItems(Folder.class));
+		} catch (Throwable t) {
 		}
 		return result;
 	}
